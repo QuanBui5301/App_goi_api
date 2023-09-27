@@ -17,16 +17,20 @@ import com.example.goiapi.API.APIservice
 import com.example.goiapi.DataAdapter.Companion.DataList
 import com.example.goiapi.data.Result
 import com.example.goiapi.data.User
+import dagger.hilt.android.AndroidEntryPoint
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import javax.inject.Inject
+import javax.inject.Named
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private val api: APIservice by lazy {
         APIClient().getClient().create(APIservice::class.java)
     }
-    @Inject lateinit var network: Network
+    @Inject
+    lateinit var apiService : APIservice
     lateinit var dataModelView: DataModelView
     lateinit var recyclerView: RecyclerView
     lateinit var progressBar: ProgressBar
@@ -34,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        DaggerAppComponent.create().inject(this)
         recyclerView = findViewById(R.id.recyclerView)
         progressBar = findViewById(R.id.progressBar)
         progressBar.visibility = View.VISIBLE
@@ -48,7 +53,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
     private fun CallData() {
-        val callApi = api.getData(true)
+        val callApi = apiService.getData(true)
         callApi.enqueue(object : Callback<User> {
             override fun onResponse(call: Call<User>, response: Response<User>) {
                 Log.e("onFailure", "Err : ${response.code()}")
